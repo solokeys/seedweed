@@ -1,0 +1,28 @@
+[build-system]
+requires = ["flit_core >=2,<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.flit.metadata]
+module = "seedweed"
+author = "Nicolas Stalder"
+author-email = "nicolas@solokeys.com"
+
+requires-python = "~=3.6"
+
+requires = [
+	"ecdsa >= 0.16.0",
+]
+
+classifiers=[
+    "License :: OSI Approved :: Apache Software License",
+    "License :: OSI Approved :: MIT License",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+]
+
+[tool.flit.scripts]
+generate-seedweed-test-vectors = "seedweed.vectors:generate"
