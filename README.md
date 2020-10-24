@@ -59,7 +59,7 @@ P256 public keys are serialized here as (X, Y) coordinates, each as zero-padded 
 
 ## Installation
 
-To install, need Python >=3.6, then: `pip install git+https://github.com/solokeys/seedweed`
+To install, need Python >=3.6, then: `pip install seedweed`
 
 Once done, there should be a command `generate-seedweed-test-vectors` you can run that
 recreates the test vectors. Modifying the [Parameters](seedweed/vectors.py#L38) allows generating
