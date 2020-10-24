@@ -15,8 +15,7 @@ clean:
 	rm -rf venv **/__pycache__ dist
 
 vectors:
-	mkdir -p data
-	venv/bin/generate-seedweed-test-vectors > data/test-vectors.csv
+	venv/bin/generate-seedweed-test-vectors > seedweed/test-vectors.csv
 
 setup:
 	virtualenv venv

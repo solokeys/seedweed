@@ -9,7 +9,7 @@ Contains:
 - `credential_id_from_seed_nonce_rpidhash`, specifying how to serialize credentials
 - `validate_credential_id` specifying how to verify a received credential ID is valid
 - `nonce_extstate_mac_from_credential_id`, specifying how to deserialize credential IDs
-- [test vectors](data/test-vectors.csv) (can easily adapt, uses independent seeded DRBG)
+- [test vectors](seedweed/test-vectors.csv) (can easily adapt, uses independent seeded DRBG)
 
 Does not contain:
 - construction of nonce / unique ID from `(seed, rp_id, user_id, entropy)` quadruples;

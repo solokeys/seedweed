@@ -1,11 +1,13 @@
 import csv
 import random
+import pathlib
 
 from . import reference as seedweed
 
 
 def load():
-    reader = csv.DictReader(open("data/test-vectors.csv"))
+    data_file = pathlib.Path(__file__).parent / "test-vectors.csv"
+    reader = csv.DictReader(open(data_file))
     data = []
     for row in reader:
         credential_id = bytes.fromhex(row["credential_id"])
