@@ -39,5 +39,9 @@ jobs:
       - name: "Generate test vectors"
         run: |
           generate-seedweed-test-vectors > our-test-vectors.csv
-          diff --brief our-test-vectors.csv data/test-vectors.csv
+          diff --brief our-test-vectors.csv seedweed/test-vectors.csv
+
+      - name: "Load test vectors"
+        run: |
+            python -c 'import seedweed; seedweed.load_test_vectors()'
 

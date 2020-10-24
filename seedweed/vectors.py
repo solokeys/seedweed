@@ -1,6 +1,6 @@
 import csv
-import random
 import pathlib
+import random
 
 from . import reference as seedweed
 
