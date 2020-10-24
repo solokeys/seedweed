@@ -1,3 +1,5 @@
+![](https://img.shields.io/pypi/l/seedweed.svg?style=flat) ![](https://img.shields.io/pypi/pyversions/seedweed.svg?style=flat) [![](https://img.shields.io/pypi/v/seedweed.svg)](https://pypi.org/project/seedweed/) ![](https://img.shields.io/pypi/wheel/seedweed.svg?style=flat)
+
 # Reference implementation and test vectors for DiceKey's "Seeding WebAuthN" specification
 
 <b>SEED</b>ing <b>WE</b>bAuthN Cr<b>ED</b>entials (weeds out implementation bugs)

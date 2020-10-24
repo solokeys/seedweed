@@ -6,6 +6,8 @@ build-backend = "flit_core.buildapi"
 module = "seedweed"
 author = "Nicolas Stalder"
 author-email = "nicolas@solokeys.com"
+home-page = "https://github.com/solokeys/seedweed"
+description-file = "README.md"
 
 requires-python = "~=3.6"
 

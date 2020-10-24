@@ -1,6 +1,6 @@
 """Seeded WebAuthn Credentials: reference implementation"""
 
-__version__ = "1.0rc1"
+__version__ = "1.0rc2"
 
 from . import conformance, vectors
 from .reference import *
