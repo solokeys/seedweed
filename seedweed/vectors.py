@@ -1,6 +1,30 @@
+import csv
 import random
 
 import seedweed
+
+
+def load():
+    reader = csv.DictReader(open("data/test-vectors.csv"))
+    data = []
+    for row in reader:
+        credential_id = bytes.fromhex(row["credential_id"])
+        nonce, extstate, mac = seedweed.nonce_extstate_mac_from_credential_id(
+            credential_id
+        )
+        data.append(
+            {
+                "seed": bytes.fromhex(row["seed"]),
+                "rp_id": row["rp_id"],
+                "nonce": nonce,
+                "mac": mac,
+                "credential_id": credential_id,
+                "secret_scalar": row["sec_scalar"],
+                "ext_state": extstate,
+            }
+        )
+
+    return data
 
 
 def random_bytes(rng, length):
@@ -103,7 +127,7 @@ def generate(parameters=Parameters()):
             "".join(
                 (
                     f"{seed.hex()},{rp_id},{nonce.hex()},{mac.hex()},{credential_id.hex()},",
-                    f"{scalar},{pub_key_uncompressed.hex()},{signature.hex()},{iterations},",
+                    f"{scalar},{pub_key_uncompressed.hex()},{signature.hex()},{iterations}",
                 )
             )
         )

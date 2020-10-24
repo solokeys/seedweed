@@ -12,6 +12,12 @@ P256 = ecdsa.NIST256p
 VERSION = bytes([1])
 
 
+def load_test_vectors():
+    import vectors
+
+    return vectors.load()
+
+
 def assert_bytes(value):
     assert isinstance(value, bytes), value
 
