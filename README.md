@@ -1,13 +1,19 @@
-# Reference implementation for the DiceKeys "Seeding WebAuthN" specification
+# Reference implementation and test vectors for DiceKey's "Seeding WebAuthN" specification
 
-<b>SEED</b>ing <b>WE</b>bAuthN Cr<b>ED</b>entials
+<b>SEED</b>ing <b>WE</b>bAuthN Cr<b>ED</b>entials (weeds out implementation bugs)
 
 Spec: <https://github.com/dicekeys/seeding-webauthn>.
 
 Contains:
-- `keypair_from_seed_nonce` specifying how to generate the P256 keypairs
+- `keypair_from_seed_mac` specifying how to generate the P256 keypairs
+- `credential_id_from_seed_nonce_rpidhash`, specifying how to serialize credentials
 - `validate_credential_id` specifying how to verify a received credential ID is valid
+- `nonce_extstate_mac_from_credential_id`, specifying how to deserialize credential IDs
 - [test vectors](data/test-vectors.csv) (can easily adapt, uses independent seeded DRBG)
+
+Does not contain:
+- construction of nonce / unique ID from `(seed, rp_id, user_id, entropy)` quadruples;
+  this is left to the authenticator implementation by the specification.
 
 The signatures are over `b"seedweed"`.
 

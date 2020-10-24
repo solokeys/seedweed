@@ -4,7 +4,7 @@ import seedweed
 
 
 def random_bytes(rng, length):
-    return bytes([rng.randint(0, 255) for _ in range(length)])
+    return rng.getrandbits(8 * length).to_bytes(length, "little")
 
 
 P256 = seedweed.P256
@@ -18,7 +18,9 @@ class Parameters:
 
         self.seeds = [
             random_bytes(rng, 32),
-            random_bytes(rng, 32),
+            bytes.fromhex(
+                "dd2ca3b88f9491c042fcc04c5e732e9f6fd9c0eb6f3b99cddd4ae96d661ada2c"
+            ),
             bytes([0] * 32),
             (P256.order + 1).to_bytes(32, "big"),
             bytes([1] * 32),
@@ -33,11 +35,13 @@ class Parameters:
             "example.com",
         ]
 
-        self.nonces = [random_bytes(rng, 32) for _ in range(4)]
-
+        self.nonces = [random_bytes(rng, 32) for _ in range(4)] + [
+            bytes.fromhex(
+                "8b911917c0b74f77e6fb819d6a8034a94f0fca487cacb41e89235c5c5220947b"
+            )
+        ]
         self.extra_states = [
             b"",
-            b"canonical encoding",
             b"sunny side up",
             random_bytes(rng, 256),
         ]
@@ -45,15 +49,23 @@ class Parameters:
 
 def generate(parameters=Parameters()):
 
-    print("seed,rp_id,credential_id,pub_key,signature")
+    print(
+        "".join(
+            (
+                "seed,rp_id,nonce,mac,credential_id,sec_scalar,pub_key,",
+                "example_signature_for_seedweed,iterations",
+            )
+        )
+    )
 
     import itertools
 
-    for extra_state, seed, rp_id, nonce in itertools.product(
+    max_iterations = 0
+    for extra_state, seed, nonce, rp_id in itertools.product(
         parameters.extra_states,
         parameters.seeds,
-        parameters.rp_ids,
         parameters.nonces,
+        parameters.rp_ids,
     ):
         rp_id_hash = H(rp_id.encode())
 
@@ -71,14 +83,30 @@ def generate(parameters=Parameters()):
         scalar, point, keypair, iterations = seedweed.keypair_from_seed_mac(seed, mac)
         # TODO: we really need some examples with >1 iterations,
         # ideally even some rare >2 case
-        assert iterations == 1
+        if iterations > max_iterations:
+            max_iterations = iterations
+        assert 1 <= scalar < P256.order
 
         # X big-endian 32B || Y big-endian 32B
         pub_key_uncompressed = keypair.verifying_key._raw_encode()
 
         signature = keypair.sign_deterministic(b"seedweed")
 
-        print(
-            f"{seed.hex()},{rp_id},{credential_id.hex()},",
-            f"{pub_key_uncompressed.hex()},{signature.hex()}",
+        nonce, ext_state, mac = seedweed.nonce_extstate_mac_from_credential_id(
+            credential_id
         )
+        # reformatted_credential_id = ":".join(
+        #     ["1", nonce.hex(), mac.hex(), ext_state.hex(), mac.hex()]
+        # )
+
+        print(
+            "".join(
+                (
+                    f"{seed.hex()},{rp_id},{nonce.hex()},{mac.hex()},{credential_id.hex()},",
+                    f"{scalar},{pub_key_uncompressed.hex()},{signature.hex()},{iterations},",
+                )
+            )
+        )
+
+    # have test cases to cover the 1 in 4 billion case
+    assert 1 < max_iterations  # <= 2

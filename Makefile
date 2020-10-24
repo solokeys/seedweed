@@ -3,13 +3,13 @@ test:
 
 # ensure this passes before commiting
 check:
-	black --check seedweed
-	isort --check seedweed
-	flake8 seedweed
+	black --check seedweed tests
+	isort --check seedweed tests
+	flake8 seedweed tests
 
 fix:
-	black seedweed
-	isort seedweed
+	black seedweed tests
+	isort seedweed tests
 
 clean:
 	rm -rf venv **/__pycache__ dist
