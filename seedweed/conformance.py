@@ -1,4 +1,4 @@
-import seedweed
+from . import reference as seedweed
 
 H = seedweed.H
 

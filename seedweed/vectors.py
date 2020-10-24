@@ -1,7 +1,7 @@
 import csv
 import random
 
-import seedweed
+from . import reference as seedweed
 
 
 def load():
