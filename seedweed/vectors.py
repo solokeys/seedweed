@@ -5,7 +5,7 @@ import random
 from . import reference as seedweed
 
 
-def load(shortlist=False):
+def load(shortlist=False, seed=0):
     data_file = pathlib.Path(__file__).parent / "test-vectors.csv"
     reader = csv.DictReader(open(data_file))
     data = []
@@ -29,6 +29,7 @@ def load(shortlist=False):
         )
 
     if shortlist:
+        random.seed(seed)
         only_one_iteration = [datum for datum in data if datum["iterations"] == 1]
         more_than_one_iterations = [datum for datum in data if datum["iterations"] > 1]
         has_empty_ext_state = [datum for datum in data if len(datum["ext_state"]) == 0]

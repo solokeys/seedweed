@@ -31,7 +31,23 @@ def vectors():
     return seedweed.load_test_vectors(shortlist=False)
 
 
-def test_conformance(vectors):
+def test_make_credential_conformance():
+    testvector = {
+        "seed": b"\xdd,\xa3\xb8\x8f\x94\x91\xc0B\xfc\xc0L^s.\x9fo\xd9\xc0\xebo;\x99\xcd\xddJ\xe9mf\x1a\xda,",  # noqa: E501
+        "rp_id": "example.com",
+    }
+    authnr_credential_id = b"\x01\xb1\xd93uA\xfc\x03\xccG\x86t=eg\xe9\xea\x8b]\xa75\x9a;\xe4h\xd9`\x94\xab/\x8d\x8e4sunny side up\xe8\xb3\xd0K*vz:}g\x0e\x0eS\xa7\xaf.\xca\x95mA\xcf\xd8\x8dlN\x830\xa5\x9e\x91\xc1%"  # noqa: E501
+    # authnr_credential_public_key = bytes.fromhex("331717b78ab7589f470063179eb5802ba79576defcc5ce221b79746dd9f7428854a5d9c75b62e85735f24371aac26da78cd0fc2a468110b40b48ca859fec8b65")  # noqa: E501
+    authnr_credential_public_key = bytes.fromhex(
+        "072b9f682bd8ca8d81f071c0050178137f846e3f83e920cff4d9ee09b2f69fecaae5d93152464d32c33e18cf108249cf3fac0edb805f6b59459d1d7a3f1a2692"  # noqa: E501
+    )
+
+    seedweed.conformance.verify_make_credential(
+        testvector, authnr_credential_id, authnr_credential_public_key
+    )
+
+
+def test_get_assertion_conformance(vectors):
     for case, inputs in sample_conformance_inputs.items():
         seedweed.conformance.verify_get_assertion(
             vectors[case],
