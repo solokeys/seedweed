@@ -45,3 +45,8 @@ def test_multi_iteration():
     iterations = seedweed.keypair_from_seed_mac(seed, mac)[-1]
 
     assert iterations == 2
+
+
+def test_testvector_coverage():
+    # this calls `select_shortlist`, which ensures various cases are covered
+    _ = seedweed.vectors.generate(print_to_stdout=False, return_vectors=False)

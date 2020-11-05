@@ -80,7 +80,7 @@ def test_incorrectness(vectors):
     incorrect_keypair = _incorrect_keypair_from_seed_mac(seed, mac)
     incorrect_pubkey = incorrect_keypair.verifying_key._raw_encode()
     print(vector.keys())
-    assert vector["pub_key"] != incorrect_pubkey, vector.keys()
+    assert vector["public_key"] != incorrect_pubkey, vector.keys()
 
 
 def _incorrect_keypair_from_seed_mac(seed: bytes, mac: bytes) -> ecdsa.SigningKey:

@@ -4,54 +4,63 @@ import random
 
 from . import reference as seedweed
 
-
-def load(shortlist=False, seed=0):
-    data_file = pathlib.Path(__file__).parent / "test-vectors.csv"
-    reader = csv.DictReader(open(data_file))
-    data = []
-    for row in reader:
-        credential_id = bytes.fromhex(row["credential_id"])
-        nonce, extstate, mac = seedweed.nonce_extstate_mac_from_credential_id(
-            credential_id
-        )
-        data.append(
-            {
-                "seed": bytes.fromhex(row["seed"]),
-                "rp_id": row["rp_id"],
-                "nonce": nonce,
-                "mac": mac,
-                "credential_id": credential_id,
-                "secret_scalar": row["sec_scalar"],
-                "pub_key": row["pub_key"],
-                "ext_state": extstate,
-                "iterations": int(row["iterations"]),
-            }
-        )
-
-    if shortlist:
-        random.seed(seed)
-        only_one_iteration = [datum for datum in data if datum["iterations"] == 1]
-        more_than_one_iterations = [datum for datum in data if datum["iterations"] > 1]
-        has_empty_ext_state = [datum for datum in data if len(datum["ext_state"]) == 0]
-        has_nontrivial_ext_state = [
-            datum for datum in data if len(datum["ext_state"]) > 0
-        ]
-
-        data = []
-        data += random.sample(only_one_iteration, 1)
-        data += random.sample(more_than_one_iterations, 1)
-        data += random.sample(has_empty_ext_state, 1)
-        data += random.sample(has_nontrivial_ext_state, 1)
-        data += random.sample(data, 4)
-    return data
+P256 = seedweed.P256
+H = seedweed.H
 
 
 def random_bytes(rng, length):
     return rng.getrandbits(8 * length).to_bytes(length, "little")
 
 
-P256 = seedweed.P256
-H = seedweed.H
+def load(shortlist=False, seed=0):
+    filename = pathlib.Path(__file__).parent / "test-vectors.csv"
+    reader = csv.DictReader(open(filename))
+    vectors = []
+    for row in reader:
+        credential_id = bytes.fromhex(row["credential_id"])
+        nonce, extstate, mac = seedweed.nonce_extstate_mac_from_credential_id(
+            credential_id
+        )
+        vectors.append(
+            {
+                "seed": bytes.fromhex(row["seed"]),
+                "rp_id": row["rp_id"],
+                "nonce": nonce,
+                "mac": mac,
+                "credential_id": credential_id,
+                "secret_scalar": row["secret_scalar"],
+                "public_key": row["public_key"],
+                "ext_state": extstate,
+                "iterations": int(row["iterations"]),
+            }
+        )
+
+    if shortlist:
+        vectors = select_shortlist(vectors, seed) + random.sample(vectors, 4)
+    return vectors
+
+
+def select_shortlist(vectors, seed=0):
+    only_one_iteration = [vector for vector in vectors if vector["iterations"] == 1]
+    more_than_one_iterations = [
+        vector for vector in vectors if vector["iterations"] > 1
+    ]
+    # more_than_two_iterations = [vector for vector in vectors if vector["iterations"] > 2]
+    has_empty_ext_state = [
+        vector for vector in vectors if len(vector["ext_state"]) == 0
+    ]
+    has_nontrivial_ext_state = [
+        vector for vector in vectors if len(vector["ext_state"]) > 0
+    ]
+
+    vectors = []
+    vectors += random.sample(only_one_iteration, 1)
+    vectors += random.sample(more_than_one_iterations, 1)
+    # vectors += random.sample(more_than_two_iterations, 1)
+    vectors += random.sample(has_empty_ext_state, 1)
+    vectors += random.sample(has_nontrivial_ext_state, 1)
+
+    return vectors
 
 
 class Parameters:
@@ -90,20 +99,21 @@ class Parameters:
         ]
 
 
-def generate(parameters=Parameters()):
-
-    print(
-        "".join(
-            (
-                "seed,rp_id,nonce,mac,credential_id,sec_scalar,pub_key,",
-                "example_signature_for_seedweed,iterations",
-            )
-        )
-    )
-
+def generate(parameters=Parameters(), print_to_stdout=True, return_vectors=False):
     import itertools
 
+    if print_to_stdout:
+        print(
+            "".join(
+                (
+                    "seed,rp_id,nonce,mac,credential_id,secret_scalar,public_key,",
+                    "example_signature_for_seedweed,iterations",
+                )
+            )
+        )
+
     max_iterations = 0
+    vectors = []
     for extra_state, seed, nonce, rp_id in itertools.product(
         parameters.extra_states,
         parameters.seeds,
@@ -123,15 +133,20 @@ def generate(parameters=Parameters()):
 
         mac = credential_id[-32:]
 
-        scalar, point, keypair, iterations = seedweed.keypair_from_seed_mac(seed, mac)
+        (
+            secret_scalar,
+            public_point,
+            keypair,
+            iterations,
+        ) = seedweed.keypair_from_seed_mac(seed, mac)
         # TODO: we really need some examples with >1 iterations,
         # ideally even some rare >2 case
         if iterations > max_iterations:
             max_iterations = iterations
-        assert 1 <= scalar < P256.order
+        assert 1 <= secret_scalar < P256.order
 
         # X big-endian 32B || Y big-endian 32B
-        pub_key_uncompressed = keypair.verifying_key._raw_encode()
+        public_key = keypair.verifying_key._raw_encode()
 
         signature = keypair.sign_deterministic(b"seedweed")
 
@@ -141,15 +156,35 @@ def generate(parameters=Parameters()):
         # reformatted_credential_id = ":".join(
         #     ["1", nonce.hex(), mac.hex(), ext_state.hex(), mac.hex()]
         # )
+        vector = {
+            "seed": seed,
+            "rp_id": rp_id,
+            "nonce": nonce,
+            "mac": mac,
+            "credential_id": credential_id,
+            "secret_scalar": secret_scalar,
+            "public_key": public_key,
+            "signature": signature,
+            "iterations": iterations,
+            "ext_state": ext_state,
+        }
+        vectors.append(vector)
 
-        print(
-            "".join(
-                (
-                    f"{seed.hex()},{rp_id},{nonce.hex()},{mac.hex()},{credential_id.hex()},",
-                    f"{scalar},{pub_key_uncompressed.hex()},{signature.hex()},{iterations}",
+        if print_to_stdout:
+            print(
+                "".join(
+                    (
+                        f"{seed.hex()},{rp_id},{nonce.hex()},{mac.hex()},{credential_id.hex()},",
+                        f"{secret_scalar},{public_key.hex()},{signature.hex()},{iterations}",
+                    )
                 )
             )
-        )
 
     # have test cases to cover the 1 in 4 billion case
     assert 1 < max_iterations  # <= 2
+
+    # have test cases to cover the shortlist
+    _ = select_shortlist(vectors)
+
+    if return_vectors:
+        return vectors
