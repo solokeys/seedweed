@@ -6,7 +6,7 @@ H = seedweed.H
 def verify_make_credential(
     testvector,
     authnr_credential_id,
-    authnr_attn_signature,
+    authnr_credential_public_key,
     attested_data,
 ):
 
@@ -32,8 +32,10 @@ def verify_make_credential(
 
     _, _, keypair, _ = seedweed.keypair_from_seed_mac(seed, authnr_mac)
 
-    # check signature, raises `BadSignatureError: Signature verification failed` else
-    keypair.verifying_key.verify(authnr_attn_signature, attested_data)
+    # tests that the correct public key is generated,
+    # implying correct secret key, implying correct number of iterations (2 in test case 37)
+    # (credentials don't need to be self-signed, typical authenticator uses direct attestation)
+    assert testvector["pub_key"] == authnr_credential_public_key
 
 
 def verify_get_assertion(
