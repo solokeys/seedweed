@@ -22,6 +22,9 @@ The signatures are over `b"seedweed"`.
 
 ## Conformance testing
 
+Calling `seedweed.load_test_vectors(shortlist=True)` in the following should
+be sufficient to hit all the known tricky corner cases.
+
 ### 1. MakeCredential
 
 For all test vectors `v` in `seedweed.load_test_vectors()`:

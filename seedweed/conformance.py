@@ -1,3 +1,5 @@
+import hashlib
+
 from . import reference as seedweed
 
 H = seedweed.H
@@ -49,4 +51,4 @@ def verify_get_assertion(
     _, _, keypair, _ = seedweed.keypair_from_seed_mac(seed, mac)
 
     # check signature, raises `BadSignatureError: Signature verification failed` else
-    keypair.verifying_key.verify(authnr_signature, signed_data)
+    keypair.verifying_key.verify(authnr_signature, signed_data, hashfunc=hashlib.sha256)
